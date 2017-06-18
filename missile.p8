@@ -16,90 +16,90 @@ cls()
 -- entity --
 ------------
 function make_ent(kind)
-	if( kind == nil ) then kind =-1 end
-	e = {}
-	e.kind = kind
+  if( kind == nil ) then kind =-1 end
+  e = {}
+  e.kind = kind
 
-	e.x = 0
-	e.y = 0
-	e.t = 0
-	e.cd = 0
-	e.vx = 0
-	e.vy = 0
-	e.frict = 1
-	e.fr = 0
-	e.ray = 4
+  e.x = 0
+  e.y = 0
+  e.t = 0
+  e.cd = 0
+  e.vx = 0
+  e.vy = 0
+  e.frict = 1
+  e.fr = 0
+  e.ray = 4
 
-	e.flash =  0
-	e.bad = 0
-	e.bul = 0
-	e.life = 1
-	e.life_max = 1
-	e.shield = 0
-	e.inv = 0
-	e.step = 0
-	e.count = 0
-	e.tsh = 0
-	e.track = {}
-	e.track_i = 1
-	e.fam = 0
-	e.draws = {}
-	e.cva = 0.1
-	e.pierce = 0
+  e.flash =  0
+  e.bad = 0
+  e.bul = 0
+  e.life = 1
+  e.life_max = 1
+  e.shield = 0
+  e.inv = 0
+  e.step = 0
+  e.count = 0
+  e.tsh = 0
+  e.track = {}
+  e.track_i = 1
+  e.fam = 0
+  e.draws = {}
+  e.cva = 0.1
+  e.pierce = 0
 
-	add(ents,e)
-	return e
+  add(ents,e)
+  return e
 end
 
 function upd_ent(e)
-	e.t = e.t+1
+  e.t = e.t+1
 
-	-- tween
-	if( e.tw ~= nil ) then
-		tw = e.tw
-		tw.c = min(tw.c+tw.spc,1)
-		c = tw.curve(tw.c)
-		tx = tw.sx*(1-c) + tw.ex*c
-		ty = tw.sy*(1-c) + tw.ey*c
-		e.vx = tx-e.x
-		e.vy = ty-e.y
-		if( tw.c == 1 ) then
-			e.tw = nil
-		end
-	end
+  -- tween
+  if( e.tw ~= nil ) then
+  tw = e.tw
+  tw.c = min(tw.c+tw.spc,1)
+  c = tw.curve(tw.c)
+  tx = tw.sx*(1-c) + tw.ex*c
+  ty = tw.sy*(1-c) + tw.ey*c
+  e.vx = tx-e.x
+  e.vy = ty-e.y
+  if( tw.c == 1 ) then
+  e.tw = nil
+  end
+  end
 
-	-- upd
-	if( e.upd ~= nil ) then e.upd(e) end
+  -- upd
+  if( e.upd ~= nil ) then e.upd(e) end
 
-	-- move
-	e.ox = e.x
-	e.oy = e.y
-	e.x = e.x + e.vx
-	e.y = e.y + e.vy
-	e.vx = e.vx * e.frict
-	e.vy = e.vy * e.frict
+  -- move
+  e.ox = e.x
+  e.oy = e.y
+  e.x = e.x + e.vx
+  e.y = e.y + e.vy
+  e.vx = e.vx * e.frict
+  e.vy = e.vy * e.frict
 
-	-- queue
-	if(e.queue) then
+  -- queue
+  if(e.queue) then
   	add_queue(e.x, e.y, e.ox, e.oy, e.queue)
-	end
+  end
 
-	if( out(e) ) then del(ents, e) end
+  if( out(e) ) then del(ents, e) end
 end
 
 function draw_ent(e)
-	if(e.flash > 0 ) then
-		for i=0,15 do pal(i,7) end
-	end
+  if(e.flash > 0 ) then
+  for i=0,15 do pal(i,7) end
+  end
 
-	-- frame
-	fr = e.fr
-	if(e.anim ~= nil) then
-		fr = e.anim[1+t%count(e.anim)]
-	end
-	if( fr >= 0 ) then
-		spr(fr, e.x-4, e.y-4)
-	end
+  -- frame
+  fr = e.fr
+  if(e.anim ~= nil) then
+  fr = e.anim[1+t%count(e.anim)]
+  end
+  if( fr >= 0 ) then
+  spr(fr, e.x-4, e.y-4)
+  end
 
  pal()
 end
@@ -109,48 +109,48 @@ end
 -- hero --
 ----------
 function make_hero()
-	hero = make_ent(0)
-	hero.x = 64
-	hero.y = 120
-	hero.fr = 2
-	hero.mis = 1
-	hero.upd = upd_hero
-	hero.fam = 1
-	hero.ray = 3
-	hero.name = "hero"
+  hero = make_ent(0)
+  hero.x = 64
+  hero.y = 120
+  hero.fr = 2
+  hero.mis = 1
+  hero.upd = upd_hero
+  hero.fam = 1
+  hero.ray = 3
+  hero.name = "hero"
 end
 
 function upd_hero(e)
-	acc = 1.5
-	e.vx = 0
-	e.vy = 0
-	if( btn(0) ) then e.vx = -acc end
-	if( btn(1) ) then e.vx = acc end
-	if( btn(2) ) then e.vy = -acc end
-	if( btn(3) ) then e.vy = acc end
+  acc = 1.5
+  e.vx = 0
+  e.vy = 0
+  if( btn(0) ) then e.vx = -acc end
+  if( btn(1) ) then e.vx = acc end
+  if( btn(2) ) then e.vy = -acc end
+  if( btn(3) ) then e.vy = acc end
 
-	if(btnp(5)) then
-		sfx(0)
-		b = fire(e)
-		b.kind = 0
-	  b.spd = 3 + rnd(0.6)
-	  b.anim = nil
-	  b.fr = -1
-	  b.pierce = 1
-		b.name = "missile"
-	  b.cva = 0.1 + rnd(0.1)
-		impulse(b, rnd(1), 3)
-	  b.outlim = 64
-	  b.queue = 1
-	  b.upd = function(e)
-				seek_trg(e)
-				follow_trg(e)
-	  	end
-	end
+  if(btnp(5)) then
+  sfx(0)
+  b = fire(e)
+  b.kind = 0
+    b.spd = 3 + rnd(0.6)
+    b.anim = nil
+    b.fr = -1
+    b.pierce = 1
+  b.name = "missile"
+    b.cva = 0.1 + rnd(0.1)
+  impulse(b, rnd(1), 3)
+    b.outlim = 64
+    b.queue = 1
+    b.upd = function(e)
+  seek_trg(e)
+  follow_trg(e)
+    	end
+  end
 
-	r = 4
-	e.x = min(max(r, e.x), 127 - r)
-	e.y = min(max(r, e.y), 127 - r)
+  r = 4
+  e.x = min(max(r, e.x), 127 - r)
+  e.y = min(max(r, e.y), 127 - r)
 end
 
 
@@ -158,49 +158,49 @@ end
 -- Missile --
 -------------
 function fire(e)
-	local b = make_ent()
-	b.x = e.x
-	b.y = e.y
-	b.ray = 1
-	b.bad = e.bad
-	b.anim = {6,6,7,7,6,6,8,8}
-	b.kind = 1 + e.bad
-	b.bul = 1
-	b.outlim = 4
-	sfx(2 + b.bad, 3)
-	return b
+  local b = make_ent()
+  b.x = e.x
+  b.y = e.y
+  b.ray = 1
+  b.bad = e.bad
+  b.anim = {6,6,7,7,6,6,8,8}
+  b.kind = 1 + e.bad
+  b.bul = 1
+  b.outlim = 4
+  sfx(2 + b.bad, 3)
+  return b
 end
 
 function follow_trg(e)
-	if(e.trg == nil) then return end
-	a = atan2(e.vx, e.vy)
+  if(e.trg == nil) then return end
+  a = atan2(e.vx, e.vy)
 
-	dx = e.trg.x - e.x
-	dy = e.trg.y - e.y
-	da = atan2(dx, dy) - a
-	if(da > 0.5) then da = da - 1 end
-	if(da < -0.5) then da = da + 1 end
-	a = a + da * e.cva
-	e.vx = cos(a) * e.spd
-	e.vy = sin(a) * e.spd
+  dx = e.trg.x - e.x
+  dy = e.trg.y - e.y
+  da = atan2(dx, dy) - a
+  if(da > 0.5) then da = da - 1 end
+  if(da < -0.5) then da = da + 1 end
+  a = a + da * e.cva
+  e.vx = cos(a) * e.spd
+  e.vy = sin(a) * e.spd
 end
 
 function seek_trg(e)
-	e.trg = boss
-	-- if( e.trg ~= nil and not e.trg.dead and e.t%10 > 0 ) then
-	-- 	return
-	-- end
-	-- e.trg = nil
-	-- best = 128
-	-- for b in all(ships) do
-	-- 	if( b.bad ~= e.bad ) then
-	-- 		d = dist_to(e,b)
-	-- 		if( d < best ) then
-	-- 			best = d
-	-- 			e.trg = b
-	-- 		end
-	-- 	end
-	-- end
+  e.trg = boss
+  -- if( e.trg ~= nil and not e.trg.dead and e.t%10 > 0 ) then
+  -- 	return
+  -- end
+  -- e.trg = nil
+  -- best = 128
+  -- for b in all(ships) do
+  -- 	if( b.bad ~= e.bad ) then
+  -- 		d = dist_to(e,b)
+  -- 		if( d < best ) then
+  -- 			best = d
+  -- 			e.trg = b
+  -- 		end
+  -- 	end
+  -- end
 end
 
 
@@ -208,40 +208,40 @@ end
 -- Enemy --
 -----------
 function upd_enemy(e)
-	lim = 80
-	spd = 1
-	if(e.shield <= 0) then
-		if(e.fr == 80) then sfx(7) end
-		e.fr = 83 + (t % 8) / 4
-		lim = 40
-		spd = 2
-	end
-	if(e.tw == nil) then
-		if(e.step < 12) then
-			if(e.t < lim) then
-				tw = move_to(e, 8 + rnd(116), 8 + rnd(60), spd)
-			else
-				e.t = 0
-				e.step = e.step + 1
-			end
-		end
-	end
+  lim = 80
+  spd = 1
+  if(e.shield <= 0) then
+  if(e.fr == 80) then sfx(7) end
+  e.fr = 83 + (t % 8) / 4
+  lim = 40
+  spd = 2
+  end
+  if(e.tw == nil) then
+  if(e.step < 12) then
+  if(e.t < lim) then
+  tw = move_to(e, 8 + rnd(116), 8 + rnd(60), spd)
+  else
+  e.t = 0
+  e.step = e.step + 1
+  end
+  end
+  end
 end
 
 function make_enemy()
-	e = make_ent()
-	e.fr = 5
-	e.bad = 1
-	e.x = 8 + rnd(112)
-	e.y = 60
-	e.fam = 1
-	add(ships, e)
+  e = make_ent()
+  e.fr = 5
+  e.bad = 1
+  e.x = 8 + rnd(112)
+  e.y = 60
+  e.fam = 1
+  add(ships, e)
 
-	e.name = 'Enemy'
-	e.fr = 80
+  e.name = 'Enemy'
+  e.fr = 80
   e.upd = upd_enemy
 
-	return e
+  return e
 end
 
 
@@ -249,49 +249,49 @@ end
 -- Utils --
 -----------
 function impulse(e,an,spd)
-	e.vx = cos(an) * spd
-	e.vy = sin(an) * spd
+  e.vx = cos(an) * spd
+  e.vy = sin(an) * spd
 end
 
 function move_to(e,tx,ty,spd)
-	tw = {}
-	tw.sx = e.x
-	tw.sy = e.y
-	tw.ex = tx
-	tw.ey = ty
-	dx = tx-e.x
-	dy = ty-e.y
-	dist = max(sqrt(dx*dx + dy*dy), 0.1*0.1)
-	tw.spc = spd/dist
-	tw.c = 0
-	tw.curve = function(c) return 0.5 - cos(c/2) * 0.5 end
-	e.tw = tw
-	return tw
+  tw = {}
+  tw.sx = e.x
+  tw.sy = e.y
+  tw.ex = tx
+  tw.ey = ty
+  dx = tx-e.x
+  dy = ty-e.y
+  dist = max(sqrt(dx*dx + dy*dy), 0.1*0.1)
+  tw.spc = spd/dist
+  tw.c = 0
+  tw.curve = function(c) return 0.5 - cos(c/2) * 0.5 end
+  e.tw = tw
+  return tw
 end
 
 function dist_to(a,b)
-	dx = a.x - b.x
-	dy = a.y - b.y
-	return sqrt(dx*dx + dy*dy)
+  dx = a.x - b.x
+  dy = a.y - b.y
+  return sqrt(dx*dx + dy*dy)
 end
 
 function out(e)
-	return e.x < 0 or e.y < 0 or e.x > 127 or e.y > 127
+  return e.x < 0 or e.y < 0 or e.x > 127 or e.y > 127
 end
 
 -- fx
 function add_queue(x,y,ex,ey,qt)
-	q = {}
-	q.x = x
-	q.y = y
-	q.ex = ex
-	q.ey = ey
-	q.t = 0
-	q.qt = qt
-	if( qt == 1 ) then
-		q.ey = q.ey + scroll_spd
-	end
-	add(queues,q)
+  q = {}
+  q.x = x
+  q.y = y
+  q.ex = ex
+  q.ey = ey
+  q.t = 0
+  q.qt = qt
+  if( qt == 1 ) then
+  q.ey = q.ey + scroll_spd
+  end
+  add(queues,q)
 end
 
 
@@ -299,29 +299,29 @@ end
 -- Draw & Update --
 -------------------
 function draw_game()
-	rectfill(0,0,127,127,0)
+  rectfill(0,0,127,127,0)
 
-	for q in all(queues) do
-		c = sget(q.t,30)
-		if(q.t >=6) then c = 1 end
-		if(q.qt == 2) then
-			c = sget(t % 4, 29)
-		end
-		q.t = q.t + 1
-		line(q.x, q.y, q.ex, q.ey, c)
-		q.y = q.y + scroll_spd
-		q.ey = q.ey + scroll_spd
-		if(q.t > 20 or q.qt > 1) then
-			del(queues, q)
-		end
-	end
+  for q in all(queues) do
+  c = sget(q.t,30)
+  if(q.t >=6) then c = 1 end
+  if(q.qt == 2) then
+  c = sget(t % 4, 29)
+  end
+  q.t = q.t + 1
+  line(q.x, q.y, q.ex, q.ey, c)
+  q.y = q.y + scroll_spd
+  q.ey = q.ey + scroll_spd
+  if(q.t > 20 or q.qt > 1) then
+  del(queues, q)
+  end
+  end
 
-	foreach(ents, draw_ent)
+  foreach(ents, draw_ent)
 end
 
 
 function upd_game()
-	foreach(ents, upd_ent)
+  foreach(ents, upd_ent)
 end
 
 
@@ -329,24 +329,24 @@ end
 -- native --
 ------------
 function _init()
-	make_hero()
-	boss = make_enemy()
-	t = 0
-	m = {}
-	m.t = 0
-	m.step = 0
-	m.upd = upd_game
-	m.draw = draw_game
+  make_hero()
+  boss = make_enemy()
+  t = 0
+  m = {}
+  m.t = 0
+  m.step = 0
+  m.upd = upd_game
+  m.draw = draw_game
 end
 
 function _update()
-	t = t + 1
-	m.t = m.t + 1
-	m.upd()
+  t = t + 1
+  m.t = m.t + 1
+  m.upd()
 end
 
 function _draw()
-	m.draw()
+  m.draw()
 end
 
 

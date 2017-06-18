@@ -54,19 +54,19 @@ end
 -- ent --
 ---------
 function make_ent(kind)
-	if( kind == nil ) then kind =-1 end
-	e = {}
-	e.kind = kind
+  if( kind == nil ) then kind =-1 end
+  e = {}
+  e.kind = kind
 
-	e.x = 0
-	e.y = 0
-	e.t = 0
-	e.cd = 0
-	e.vx = 0
-	e.vy = 0
-	e.frict = 1
-	e.fr = 0
-	e.ray = 4
+  e.x = 0
+  e.y = 0
+  e.t = 0
+  e.cd = 0
+  e.vx = 0
+  e.vy = 0
+  e.frict = 1
+  e.fr = 0
+  e.ray = 4
 
  e.flash =  0
  e.bad = 0
@@ -85,54 +85,54 @@ function make_ent(kind)
  e.cva = 0.1
  e.pierce = 0
 
-	add(ents,e)
-	return e
+  add(ents,e)
+  return e
 end
 
 ----------
 -- hero --
 ----------
 function make_hero()
-	hero = make_ent(0)
-	hero.x = 64
-	hero.y = 120
-	hero.fr = 2
-	hero.mis = 1
-	hero.upd = upd_hero
-	hero.fam = 1
-	hero.ray = 3
+  hero = make_ent(0)
+  hero.x = 64
+  hero.y = 120
+  hero.fr = 2
+  hero.mis = 1
+  hero.upd = upd_hero
+  hero.fam = 1
+  hero.ray = 3
 end
 
 function upd_hero(e)
-	acc = 1.5
-	e.vx = 0
-	e.vy = 0
+  acc = 1.5
+  e.vx = 0
+  e.vy = 0
  if( btn(0) ) then e.vx = -acc end
  if( btn(1) ) then e.vx = acc end
  if( btn(2) ) then e.vy = -acc end
  if( btn(3) ) then e.vy = acc end
 
-	if( btnp(5) and e.mis > 0 ) then
-		b = fire(e)
-		b.kind = 0
-	  b.fr = -1
-	  b.spd = 3+rnd(0.6)
-	  b.anim = nil
-	  b.fr = -1
-	  b.pierce = 1
-	  b.cva = 0.1+rnd(0.1)
-		impulse(b,rnd(1),3)
-	  b.outlim = 64
-	  b.queue = 1
-	  b.upd = function(e)
-				seek_trg(e)
-				follow_trg(e)
-	    end
-	end
-	-- recal
+  if( btnp(5) and e.mis > 0 ) then
+  b = fire(e)
+  b.kind = 0
+    b.fr = -1
+    b.spd = 3+rnd(0.6)
+    b.anim = nil
+    b.fr = -1
+    b.pierce = 1
+    b.cva = 0.1+rnd(0.1)
+  impulse(b,rnd(1),3)
+    b.outlim = 64
+    b.queue = 1
+    b.upd = function(e)
+  seek_trg(e)
+  follow_trg(e)
+      end
+  end
+  -- recal
  r = 4
-	e.x = min(max(r,e.x),127-r)
-	e.y = min(max(r,e.y),127-r)
+  e.x = min(max(r,e.x),127-r)
+  e.y = min(max(r,e.y),127-r)
 end
 
 ----------
@@ -153,24 +153,24 @@ function make_bad(na,sc,li,sh)
 end
 
 function upd_enemy(e)
-	lim = 80
-	spd = 1
-	if(e.shield <= 0) then
-		if(e.fr == 80) then sfx(7) end
-		e.fr = 83 + (t % 8) / 4
-		lim = 40
-		spd = 2
-	end
-	if(e.tw == nil) then
-		if(e.step < 12) then
-			if(e.t < lim) then
-				tw = move_to(e, 8 + rnd(116), 8 + rnd(60), spd)
-			else
-				e.t = 0
-				e.step = e.step + 1
-			end
-		end
-	end
+  lim = 80
+  spd = 1
+  if(e.shield <= 0) then
+  if(e.fr == 80) then sfx(7) end
+  e.fr = 83 + (t % 8) / 4
+  lim = 40
+  spd = 2
+  end
+  if(e.tw == nil) then
+  if(e.step < 12) then
+  if(e.t < lim) then
+  tw = move_to(e, 8 + rnd(116), 8 + rnd(60), spd)
+  else
+  e.t = 0
+  e.step = e.step + 1
+  end
+  end
+  end
 end
 
 function make_roll()
@@ -204,14 +204,14 @@ function upd_ent(e)
  e.ox = e.x
  e.oy = e.y
  e.x = e.x+e.vx
-	e.y = e.y+e.vy
-	e.vx = e.vx*e.frict
-	e.vy = e.vy*e.frict
+  e.y = e.y+e.vy
+  e.vx = e.vx*e.frict
+  e.vy = e.vy*e.frict
 
-	-- queue
-	if( e.queue ) then
+  -- queue
+  if( e.queue ) then
   add_queue(e.x,e.y,e.ox,e.oy,e.queue)
-	end
+  end
 
 end
 
@@ -476,7 +476,7 @@ end
 
 function _draw()
  if(m.draw ~= nil ) then
-		m.draw()
+  m.draw()
  end
  if( log ~= nil ) then
   print(log,0,0,7)
