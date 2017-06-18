@@ -23,29 +23,15 @@ function make_ent(kind)
   e.x = 0
   e.y = 0
   e.t = 0
-  e.cd = 0
   e.vx = 0
   e.vy = 0
   e.frict = 1
   e.fr = 0
-  e.ray = 4
 
-  e.flash =  0
   e.bad = 0
-  e.bul = 0
-  e.life = 1
-  e.life_max = 1
-  e.shield = 0
-  e.inv = 0
   e.step = 0
   e.count = 0
-  e.tsh = 0
-  e.track = {}
-  e.track_i = 1
-  e.fam = 0
-  e.draws = {}
   e.cva = 0.1
-  e.pierce = 0
 
   add(ents,e)
   return e
@@ -88,10 +74,6 @@ function upd_ent(e)
 end
 
 function draw_ent(e)
-  if(e.flash > 0 ) then
-  for i=0,15 do pal(i,7) end
-  end
-
   -- frame
   fr = e.fr
   if(e.anim ~= nil) then
@@ -115,8 +97,6 @@ function make_hero()
   hero.fr = 2
   hero.mis = 1
   hero.upd = upd_hero
-  hero.fam = 1
-  hero.ray = 3
   hero.name = "hero"
 end
 
@@ -136,7 +116,6 @@ function upd_hero(e)
     b.spd = 3 + rnd(0.6)
     b.anim = nil
     b.fr = -1
-    b.pierce = 1
   b.name = "missile"
     b.cva = 0.1 + rnd(0.1)
   impulse(b, rnd(1), 3)
@@ -161,11 +140,9 @@ function fire(e)
   local b = make_ent()
   b.x = e.x
   b.y = e.y
-  b.ray = 1
   b.bad = e.bad
   b.anim = {6,6,7,7,6,6,8,8}
   b.kind = 1 + e.bad
-  b.bul = 1
   b.outlim = 4
   sfx(2 + b.bad, 3)
   return b
@@ -210,21 +187,15 @@ end
 function upd_enemy(e)
   lim = 80
   spd = 1
-  if(e.shield <= 0) then
-  if(e.fr == 80) then sfx(7) end
-  e.fr = 83 + (t % 8) / 4
-  lim = 40
-  spd = 2
-  end
   if(e.tw == nil) then
-  if(e.step < 12) then
-  if(e.t < lim) then
-  tw = move_to(e, 8 + rnd(116), 8 + rnd(60), spd)
-  else
-  e.t = 0
-  e.step = e.step + 1
-  end
-  end
+    if(e.step < 12) then
+      if(e.t < lim) then
+        tw = move_to(e, 8 + rnd(116), 8 + rnd(60), spd)
+      else
+        e.t = 0
+        e.step = e.step + 1
+      end
+    end
   end
 end
 
@@ -234,7 +205,6 @@ function make_enemy()
   e.bad = 1
   e.x = 8 + rnd(112)
   e.y = 60
-  e.fam = 1
   add(ships, e)
 
   e.name = 'Enemy'
