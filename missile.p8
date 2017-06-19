@@ -170,20 +170,20 @@ end
 
 function seek_trg(e)
   e.trg = boss
-  -- if( e.trg ~= nil and not e.trg.dead and e.t%10 > 0 ) then
-  -- 	return
-  -- end
-  -- e.trg = nil
-  -- best = 128
-  -- for b in all(ships) do
-  -- 	if( b.bad ~= e.bad ) then
-  -- 		d = dist_to(e,b)
-  -- 		if( d < best ) then
-  -- 			best = d
-  -- 			e.trg = b
-  -- 		end
-  -- 	end
-  -- end
+  if( e.trg ~= nil and not e.trg.dead and e.t%10 > 0 ) then
+    return
+  end
+  e.trg = nil
+  best = 128
+  for b in all(ships) do
+    if( b.bad ~= e.bad ) then
+      d = dist_to(e,b)
+      if( d < best ) then
+        best = d
+        e.trg = b
+      end
+    end
+  end
 end
 
 
@@ -283,6 +283,7 @@ function explode(e)
   exp.t = 0
   sfx(1, 3)
   add(explosions, exp)
+  
   del(ents, e)
 end
 
@@ -316,6 +317,13 @@ function draw_game()
     if(exp.t < 6) then
       local ray = 4 + (2 - 2 / (exp.t + 1)) * 16
       circ(exp.x, exp.y, ray, c[exp.t + 1])
+      
+     	for i=1,10 do
+  					local source = rnd(flr(0x6000+8192))
+  					local range = flr(rnd(64))
+  					local dest = 0x6000 + rnd(8192-range)-2
+  					memcpy(dest, source, range)
+					end
     end
     exp.t = exp.t+1
     if( exp.t == 10 ) then
@@ -642,3 +650,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+
