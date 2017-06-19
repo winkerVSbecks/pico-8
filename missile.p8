@@ -1,14 +1,15 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
--- pat shooter
--- benjamin soule
+-- fork of pat shooter by benjamin soule just the missiles
+-- varun vachhar
 
 mis_max = 24
 scroll_spd = 4
 ents = {}
 queues = {}
 ships = {}
+explosions = {}
 cls()
 
 
@@ -42,16 +43,16 @@ function upd_ent(e)
 
   -- tween
   if( e.tw ~= nil ) then
-  tw = e.tw
-  tw.c = min(tw.c+tw.spc,1)
-  c = tw.curve(tw.c)
-  tx = tw.sx*(1-c) + tw.ex*c
-  ty = tw.sy*(1-c) + tw.ey*c
-  e.vx = tx-e.x
-  e.vy = ty-e.y
-  if( tw.c == 1 ) then
-  e.tw = nil
-  end
+    tw = e.tw
+    tw.c = min(tw.c+tw.spc,1)
+    c = tw.curve(tw.c)
+    tx = tw.sx*(1-c) + tw.ex*c
+    ty = tw.sy*(1-c) + tw.ey*c
+    e.vx = tx-e.x
+    e.vy = ty-e.y
+    if( tw.c == 1 ) then
+    e.tw = nil
+    end
   end
 
   -- upd
@@ -71,6 +72,10 @@ function upd_ent(e)
   end
 
   if( out(e) ) then del(ents, e) end
+
+  if( e.name == "missile" ) then
+    if( col(e, e.trg) ) then explode(e) end
+  end
 end
 
 function draw_ent(e)
@@ -110,21 +115,21 @@ function upd_hero(e)
   if( btn(3) ) then e.vy = acc end
 
   if(btnp(5)) then
-  sfx(0)
-  b = fire(e)
-  b.kind = 0
+    sfx(0)
+    sfx(1, 3)
+    b = fire(e)
+    b.kind = 0
     b.spd = 3 + rnd(0.6)
     b.anim = nil
     b.fr = -1
-  b.name = "missile"
     b.cva = 0.1 + rnd(0.1)
-  impulse(b, rnd(1), 3)
+    impulse(b, rnd(1), 3)
     b.outlim = 64
     b.queue = 1
     b.upd = function(e)
-  seek_trg(e)
-  follow_trg(e)
-    	end
+      seek_trg(e)
+      follow_trg(e)
+    end
   end
 
   r = 4
@@ -134,7 +139,7 @@ end
 
 
 -------------
--- Missile --
+-- missile --
 -------------
 function fire(e)
   local b = make_ent()
@@ -144,6 +149,7 @@ function fire(e)
   b.anim = {6,6,7,7,6,6,8,8}
   b.kind = 1 + e.bad
   b.outlim = 4
+  b.name = "missile"
   sfx(2 + b.bad, 3)
   return b
 end
@@ -182,7 +188,7 @@ end
 
 
 -----------
--- Enemy --
+-- enemy --
 -----------
 function upd_enemy(e)
   lim = 80
@@ -207,7 +213,7 @@ function make_enemy()
   e.y = 60
   add(ships, e)
 
-  e.name = 'Enemy'
+  e.name = 'enemy'
   e.fr = 80
   e.upd = upd_enemy
 
@@ -216,7 +222,7 @@ end
 
 
 -----------
--- Utils --
+-- utils --
 -----------
 function impulse(e,an,spd)
   e.vx = cos(an) * spd
@@ -249,8 +255,7 @@ function out(e)
   return e.x < 0 or e.y < 0 or e.x > 127 or e.y > 127
 end
 
--- fx
-function add_queue(x,y,ex,ey,qt)
+function add_queue(x, y, ex, ey, qt)
   q = {}
   q.x = x
   q.y = y
@@ -258,40 +263,67 @@ function add_queue(x,y,ex,ey,qt)
   q.ey = ey
   q.t = 0
   q.qt = qt
-  if( qt == 1 ) then
-  q.ey = q.ey + scroll_spd
+  if(qt == 1) then
+    q.ey = q.ey + scroll_spd
   end
   add(queues,q)
 end
 
+function col(a, b)
+  adx = abs(a.x - b.x)
+  ady = abs(a.y - b.y)
+  lim = 6
+  return adx < lim and ady < lim
+end
+
+function explode(e)
+  exp = {}
+  exp.x = e.x
+  exp.y = e.y
+  exp.t = 0
+  sfx(1, 3)
+  add(explosions, exp)
+  del(ents, e)
+end
+
 
 -------------------
--- Draw & Update --
+-- draw & update --
 -------------------
 function draw_game()
   rectfill(0,0,127,127,0)
 
   for q in all(queues) do
-  c = sget(q.t,30)
-  if(q.t >=6) then c = 1 end
-  if(q.qt == 2) then
-  c = sget(t % 4, 29)
+    c = sget(q.t, 30)
+    if(q.t >=6) then c = 1 end
+    if(q.qt == 2) then
+      c = sget(t % 4, 29)
+    end
+    q.t = q.t + 1
+    line(q.x, q.y, q.ex, q.ey, c)
+    q.y = q.y + scroll_spd
+    q.ey = q.ey + scroll_spd
+    if(q.t > 20 or q.qt > 1) then
+      del(queues, q)
+    end
   end
-  q.t = q.t + 1
-  line(q.x, q.y, q.ex, q.ey, c)
-  q.y = q.y + scroll_spd
-  q.ey = q.ey + scroll_spd
-  if(q.t > 20 or q.qt > 1) then
-  del(queues, q)
-  end
+
+  -- explosions
+  for exp in all(explosions) do
+    local fr = flr(exp.t * 0.5)
+    sspr(fr*16, 8, 16, 16, exp.x - 8, exp.y - 8, 16, 16)
+    local c = {7,6,12,13,1,1}
+    if(exp.t < 6) then
+      local ray = 4 + (2 - 2 / (exp.t + 1)) * 16
+      circ(exp.x, exp.y, ray, c[exp.t + 1])
+    end
+    exp.t = exp.t+1
+    if( exp.t == 10 ) then
+      del(explosions, exp)
+    end
   end
 
   foreach(ents, draw_ent)
-end
-
-
-function upd_game()
-  foreach(ents, upd_ent)
 end
 
 
@@ -301,22 +333,14 @@ end
 function _init()
   make_hero()
   boss = make_enemy()
-  t = 0
-  m = {}
-  m.t = 0
-  m.step = 0
-  m.upd = upd_game
-  m.draw = draw_game
 end
 
 function _update()
-  t = t + 1
-  m.t = m.t + 1
-  m.upd()
+  foreach(ents, upd_ent)
 end
 
 function _draw()
-  m.draw()
+  draw_game()
 end
 
 
@@ -490,7 +514,7 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000500002f3502934025330213201f3101b7001570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000737300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
